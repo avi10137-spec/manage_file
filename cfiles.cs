@@ -8,7 +8,9 @@ class files_system
     {
         if (!File.Exists(path))
         {
-            Console.WriteLine("Eror: File reports.txt not found");
+            string[] nemeFile = path.Split('\\');
+            
+            Console.WriteLine($"Eror: File {nemeFile[nemeFile.Length-1]}  not found");
             return [];
         }
         
@@ -24,6 +26,47 @@ class files_system
         }
         return resultAllLines;
     }
+
+    static string[] processLine(string line)
+    {
+        string[] myLine = line.Split(',', StringSplitOptions.TrimEntries);
+        {        
+            return myLine;
+        }
+        return [];
+
+    }
+
+    static bool countLine(string[] myline)
+    {
+        if (myline.Length == 5)
+        {
+            return true;
+        }
+        return false;
+    }
+    static bool validConvert(string[] myline)
+    {
+        int priority;
+        if (!int.TryParse(myline[2], out priority) || (priority < 1 & priority > 5))
+        {
+            Console.WriteLine($" {myline[2]} invalid record");//todo
+            return false;
+        }
+        double score;
+        if (!double.TryParse(myline[3], out score) || (score < 0.0 & priority > 100.0))
+        {
+            Console.WriteLine($" {myline[3]} invalid record");//todo
+            return false;
+        }
+        Console.WriteLine("valid record process");
+        return true;
+    }
+
+    //static int ProcessReports(List<string>)
+    //{
+
+    //}
     static void Main()
     {
         string path = @"..\..\..\reports.txt";
@@ -33,7 +76,7 @@ class files_system
         {
             Console.WriteLine($"file loaded :{counter_files} lines found ");
 
-
+                string[] myLine1 = processLine("Alpha,  Collect,3,87.5,Approved");
 
 
 
