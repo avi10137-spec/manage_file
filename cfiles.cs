@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 namespace program;
 enum ReportType  {Collect, Analyze, Recon, Intel}
 enum ReportStatus { Rejected, Approved, Pending }
@@ -88,7 +89,7 @@ class files_system
         return true;
     }
 
-    static int ProcessReports(List<string> myLines, string[] UnitName, string[] ReportType, int[] Priority, double[] Score, string[] Status, ref int numberValidLines, ref int numbeInalidLines)
+    static int ProcessReports(List<string> myLines, string[] UnitName, ReportType[] types, int[] Priority, double[] Score, ReportStatus[] Status, ref int numberValidLines, ref int numbeInalidLines)
 
     {
 
@@ -102,10 +103,12 @@ class files_system
                 double score;
                 double.TryParse(myLine[3], out score);
                 UnitName[numberValidLines] = myLine[0];
-                ReportType[numberValidLines] = myLine[1];
+                ReportType.TryParse(myLine[1], true, out ReportType Repot);
+                types[numberValidLines] = Repot;
                 Priority[numberValidLines] = priority;
                 Score[numberValidLines] = score;
-                Status[numberValidLines] = myLine[4];
+                ReportStatus.TryParse(myLine[4], true, out ReportStatus ReporS);
+                Status[numberValidLines] = ReporS;
                 numberValidLines++;
 
 
@@ -157,15 +160,16 @@ class files_system
             return mini;
         }
     }
-    static int CountByStatus(string[] statuses,string status)
+    static int CountByStatus(ReportStatus[] statuses,string status,int number)
     {
         int sumStatus = 0;
-        foreach(string stri in statuses)
+        for (int i = 0; i < number; i++)
         {
-            if (stri.ToLower() == status.ToLower())
+            if (statuses[i].ToString().ToLower() == status.ToLower())
             {
                 sumStatus += 1;
             }
+       
         }
         return sumStatus;
     }
@@ -186,19 +190,19 @@ class files_system
         Console.WriteLine("=== Report Statistics ===");
         Console.WriteLine($"number of valid {numberValid}");
         double avg = CalculateAverege(score, numberValid);
-        Console.WriteLine($"avg is {avg}");
+        Console.WriteLine($"avg is {avg.ToString("F2")}");
         double maxi = findMaxScore(score, numberValid);
         Console.WriteLine($" high score  is {maxi}");
         double mini = findMinScore(score, numberValid);
         Console.WriteLine($" min score is {mini}");
     }
-    static void DisplayStatusCounts(string[] statuses,int numberVaklid)
+    static void DisplayStatusCounts(ReportStatus[] statuses,int numberVaklid)
     {
-        int counterStatus = CountByStatus(statuses, "Rejected");
+        int counterStatus = CountByStatus(statuses, "Rejected",numberVaklid);
         Console.WriteLine($"count of status is {counterStatus}");
-        int counterStatus1 = CountByStatus(statuses, "Approved");
+        int counterStatus1 = CountByStatus(statuses, "Approved",numberVaklid);
         Console.WriteLine($"count of status is {counterStatus1}");
-        int counterStatus2 = CountByStatus(statuses, "Pending");
+        int counterStatus2 = CountByStatus(statuses, "Pending",numberVaklid);
         Console.WriteLine($"count of status is {counterStatus2}");
     }
     static void displayTypeCount(string[] types,int numberValid)
@@ -212,6 +216,26 @@ class files_system
         int counterType3 = CountByType(types, "Intel");
         Console.WriteLine($"count of type is {counterType3}");
     }
+    static void DisplayHighestPriorityApproved(string[] UnitName, ReportType[] types, int[] Priority, double[] Score, ReportStatus[] Status,int numList)
+    {
+        int maxi = Priority[0];
+        int index = 0;
+
+        for (int i = 0; i < numList; i++)
+        {
+         if (Status[i] == ReportStatus.Approved && Priority[i] > maxi)
+            {
+                index = i;
+                maxi = Priority[i];
+            }
+        }
+        Console.WriteLine("=== Highest Priority Approved Report ===");
+        Console.WriteLine($"unit : {UnitName[index]}");
+        Console.WriteLine($"type : {types[index]}");
+        Console.WriteLine($"priority: {Priority[index]}");
+        Console.WriteLine($"Score :{Score[index]} ");
+    }   
+
     static void Main()
         {
             string path = @"..\..\..\reports.txt";
@@ -224,18 +248,18 @@ class files_system
                 int numberInvalidLines = 0;
                 string[] myLine1 = processLine("Alpha,  Collect,3,87.5,Approved");
                 string[] UnitName = new string[100];
-                string[] ReportType = new string[100];
+                ReportType[] ReportType = new ReportType[100];
                 int[] Priority = new int[100];
                 double[] Score = new double[100];
-                string[] Status = new string[100];
+                ReportStatus [] Status = new ReportStatus[100];
                 numberValidLines = ProcessReports(allFiles, UnitName, ReportType, Priority, Score, Status, ref numberValidLines, ref numberInvalidLines);
                 Console.WriteLine($"number  of valid records for analisis {numberValidLines}");
                 Console.WriteLine($"number  of invalid records for analisis {numberInvalidLines}");
                
-                int counterStatus = CountByStatus(Status, "Rejected");
-                Console.WriteLine($"count of status is {counterStatus}");
                
-
+                
+                DisplayStatusCounts(Status, numberValidLines);
+            DisplayHighestPriorityApproved(UnitName, ReportType, Priority, Score, Status, numberValidLines);
 
 
 
