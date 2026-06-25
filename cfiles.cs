@@ -53,18 +53,18 @@ class files_system
         int priority;
         if (!int.TryParse(myline[2], out priority))
         {
-            Console.WriteLine($"invalid record");//todo
+            Console.WriteLine($"invalid record");
             return false;
         }
         if (priority < 1 || priority > 5)
         {
-            Console.WriteLine($"invalid record out of range");//todo
+            Console.WriteLine($"invalid record out of range");
             return false;
         }
         double score;
         if (!double.TryParse(myline[3], out score))
         {
-            Console.WriteLine($"invalid record");//todo
+            Console.WriteLine($"invalid record");
             return false;
         }
         if (score < 0.0 || score > 100.0)
@@ -90,7 +90,7 @@ class files_system
         return true;
     }
 
-    static int ProcessReports(List<string> myLines, string[] UnitName, ReportType[] types, int[] Priority, double[] Score, ReportStatus[] Status, ref int numberValidLines, ref int numbeInalidLines)
+    static int ProcessReports(List<string> myLines, string[] UnitName, ReportType[] types, int[] Priority, double[] Score, ReportStatus[] Status,  int numberValidLines, ref int numbeInalidLines)
 
     {
 
@@ -127,10 +127,11 @@ class files_system
     static double CalculateAverege(double[] score, int numberValid)
     {
         double sumi = 0;
-        foreach (double numi in score)
+        for (int i = 0; i < numberValid; i++)
         {
-            sumi += numi;
+            sumi += score[i];
         }
+       
         return sumi / numberValid;
     }
     static double findMaxScore(double[] score, int numbervalid)
@@ -174,15 +175,17 @@ class files_system
         }
         return sumStatus;
     }
-    static int CountByType(ReportType[] types, string type)
+    static int CountByType(ReportType[] types, string type,int numValid)
     {
         int sumType = 0;
-        foreach (ReportType stri in types)
+        for (int i = 0; i < numValid ; i++)
         {
-            if (stri.ToString().ToLower() == type.ToLower())
+            if (types[i].ToString().ToLower() == type.ToLower())
             {
                 sumType += 1;
             }
+      
+           
         }
         return sumType;
     }
@@ -211,19 +214,19 @@ class files_system
     static void displayTypeCountReportType(ReportType[] types, int numberValid)
     {
         Console.WriteLine("=== Reports by Type ===");
-        int counterType = CountByType(types, "Collect");
+        int counterType = CountByType(types, "Collect",numberValid);
         Console.WriteLine($"Collect: {counterType}");
-        int counterType1 = CountByType(types, "Analyze");
+        int counterType1 = CountByType(types, "Analyze",numberValid);
         Console.WriteLine($"Analyze: {counterType1}");
-        int counterType2 = CountByType(types, "Recon");
+        int counterType2 = CountByType(types, "Recon",numberValid);
         Console.WriteLine($"Recon: {counterType2}");
-        int counterType3 = CountByType(types, "Intel");
+        int counterType3 = CountByType(types, "Intel",numberValid);
         Console.WriteLine($"Intel: {counterType3}\n");
     }
     static void DisplayHighestPriorityApproved(string[] UnitName, ReportType[] types, int[] Priority, double[] Score, ReportStatus[] Status, int numList)
     {
-        int maxi = Priority[0];
-        int index = 0;
+        int maxi = -1;
+        int index = -1;
 
         for (int i = 0; i < numList; i++)
         {
@@ -233,11 +236,13 @@ class files_system
                 maxi = Priority[i];
             }
         }
+        if(index != -1) { 
         Console.WriteLine("=== Highest Priority Approved Report ===");
         Console.WriteLine($"unit : {UnitName[index]}");
         Console.WriteLine($"type : {types[index]}");
         Console.WriteLine($"priority: {Priority[index]}");
         Console.WriteLine($"Score :{Score[index]}\n ");
+    }
     }
     static void DisplayAverageByPriority(int[] Priority, double[] Score, int numValid)
     {
@@ -259,9 +264,7 @@ class files_system
     }
     static void Main()
     {
-        using (StreamWriter writer = new StreamWriter("output.txt"))
-        {
-            Console.SetOut(writer);
+      
             string path = @"..\..\..\reports.txt";
             List<string> allFiles = loadFile(path);
             int counter_files = allFiles.Count;
@@ -275,7 +278,7 @@ class files_system
                 int[] Priority = new int[100];
                 double[] Score = new double[100];
                 ReportStatus[] Status = new ReportStatus[100];
-                numberValidLines = ProcessReports(allFiles, UnitName, ReportType, Priority, Score, Status, ref numberValidLines, ref numberInvalidLines);
+                numberValidLines = ProcessReports(allFiles, UnitName, ReportType, Priority, Score, Status,  numberValidLines, ref numberInvalidLines);
                 Console.WriteLine($"file loaded :{counter_files} lines found ");
                 Console.WriteLine("Processing complete ");
                 Console.WriteLine($"valid records  {numberValidLines}");
@@ -300,4 +303,4 @@ class files_system
         }
 
     }
-}
+
